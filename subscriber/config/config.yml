@@ -1,0 +1,26 @@
+#MQTT CLIENT CONFIGURATIONS
+client:
+  clientId: "cg_subscriber"
+  serverAddress: "tcp://localhost:1883"
+  qos: 1
+  connectionTimeout: 1
+  writeTimeout: 1
+  keepAlive: 10
+  pingTimeout: 1
+  connectRetry: true
+  autoConnect: true
+
+#LOGS
+#writeTolog - If true then received messages will be written to the console
+#writeToDisk - If true then received messages will be written to the OutPutFile path
+logs:
+  writeToLog: true
+  writeToDisk: false
+  outPutFile: "./binds/receivedMessages.txt"
+
+#TOPICS TO SUBSCRIBE TO
+topics:
+  topic:
+    - "/cg-playground/sample/1"
+    - "/cg-playground/sample/2"
+    - "/cg-playground/sample/3"

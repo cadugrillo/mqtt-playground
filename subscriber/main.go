@@ -35,7 +35,11 @@ const (
 	WRITETOLOG  = true  // If true then received messages will be written to the console
 	WRITETODISK = false // If true then received messages will be written to the file below
 
-	OUTPUTFILE = "/binds/receivedMessages.txt"
+	OUTPUTFILE = "./binds/receivedMessages.txt"
+)
+
+var (
+	TOPICS [3]string
 )
 
 // handler is a simple struct that provides a function to be called when a message is received. The message is parsed
@@ -91,6 +95,10 @@ func (o *handler) handle(_ mqtt.Client, msg mqtt.Message) {
 }
 
 func main() {
+
+	TOPICS[0] = "/cg-playground/sample/1"
+	TOPICS[1] = "/cg-playground/sample/2"
+	TOPICS[2] = "/cg-playground/sample/3"
 	// Enable logging by uncommenting the below
 	// mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)
 	// mqtt.CRITICAL = log.New(os.Stdout, "[CRITICAL] ", 0)
@@ -133,17 +141,21 @@ func main() {
 
 		// Establish the subscription - doing this here means that it will happen every time a connection is established
 		// (useful if opts.CleanSession is TRUE or the broker does not reliably store session data)
-		t := c.Subscribe(TOPIC, QOS, h.handle)
-		// the connection handler is called in a goroutine so blocking here would hot cause an issue. However as blocking
-		// in other handlers does cause problems its best to just assume we should not block
-		go func() {
-			_ = t.Wait() // Can also use '<-t.Done()' in releases > 1.2.0
-			if t.Error() != nil {
-				fmt.Printf("ERROR SUBSCRIBING: %s\n", t.Error())
-			} else {
-				fmt.Println("subscribed to: ", TOPIC)
-			}
-		}()
+		for i := 0; i < len(TOPICS); i++ {
+			t := c.Subscribe(TOPICS[i], QOS, h.handle)
+			id := i
+
+			// the connection handler is called in a goroutine so blocking here would not cause an issue. However as blocking
+			// in other handlers does cause problems its best to just assume we should not block
+			go func() {
+				_ = t.Wait() // Can also use '<-t.Done()' in releases > 1.2.0
+				if t.Error() != nil {
+					fmt.Printf("ERROR SUBSCRIBING: %s\n", t.Error())
+				} else {
+					fmt.Println("subscribed to: ", TOPICS[id])
+				}
+			}()
+		}
 	}
 	opts.OnReconnecting = func(mqtt.Client, *mqtt.ClientOptions) {
 		fmt.Println("attempting to reconnect")
@@ -156,7 +168,9 @@ func main() {
 
 	// If using QOS2 and CleanSession = FALSE then messages may be transmitted to us before the subscribe completes.
 	// Adding routes prior to connecting is a way of ensuring that these messages are processed
-	client.AddRoute(TOPIC, h.handle)
+	for i := 0; i < len(TOPICS); i++ {
+		client.AddRoute(TOPICS[i], h.handle)
+	}
 
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
