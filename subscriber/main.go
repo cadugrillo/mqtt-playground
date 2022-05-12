@@ -18,6 +18,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"mqtt-playground/subscriber/config"
 	"os"
 	"os/signal"
 	"syscall"
@@ -39,7 +40,7 @@ const (
 )
 
 var (
-	TOPICS [3]string
+	ConfigFile config.Config
 )
 
 // handler is a simple struct that provides a function to be called when a message is received. The message is parsed
@@ -96,9 +97,8 @@ func (o *handler) handle(_ mqtt.Client, msg mqtt.Message) {
 
 func main() {
 
-	TOPICS[0] = "/cg-playground/sample/1"
-	TOPICS[1] = "/cg-playground/sample/2"
-	TOPICS[2] = "/cg-playground/sample/3"
+	ConfigFile = config.ReadConfig()
+
 	// Enable logging by uncommenting the below
 	// mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)
 	// mqtt.CRITICAL = log.New(os.Stdout, "[CRITICAL] ", 0)
@@ -141,8 +141,8 @@ func main() {
 
 		// Establish the subscription - doing this here means that it will happen every time a connection is established
 		// (useful if opts.CleanSession is TRUE or the broker does not reliably store session data)
-		for i := 0; i < len(TOPICS); i++ {
-			t := c.Subscribe(TOPICS[i], QOS, h.handle)
+		for i := 0; i < len(ConfigFile.Topics.Topic); i++ {
+			t := c.Subscribe(ConfigFile.Topics.Topic[i], QOS, h.handle)
 			id := i
 
 			// the connection handler is called in a goroutine so blocking here would not cause an issue. However as blocking
@@ -152,7 +152,7 @@ func main() {
 				if t.Error() != nil {
 					fmt.Printf("ERROR SUBSCRIBING: %s\n", t.Error())
 				} else {
-					fmt.Println("subscribed to: ", TOPICS[id])
+					fmt.Println("subscribed to: ", ConfigFile.Topics.Topic[id])
 				}
 			}()
 		}
@@ -168,8 +168,8 @@ func main() {
 
 	// If using QOS2 and CleanSession = FALSE then messages may be transmitted to us before the subscribe completes.
 	// Adding routes prior to connecting is a way of ensuring that these messages are processed
-	for i := 0; i < len(TOPICS); i++ {
-		client.AddRoute(TOPICS[i], h.handle)
+	for i := 0; i < len(ConfigFile.Topics.Topic); i++ {
+		client.AddRoute(ConfigFile.Topics.Topic[i], h.handle)
 	}
 
 	if token := client.Connect(); token.Wait() && token.Error() != nil {

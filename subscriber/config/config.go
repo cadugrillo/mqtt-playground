@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -29,12 +28,8 @@ type Config struct {
 	} `yaml:"topics"`
 }
 
-var (
-	cfg Config
-)
-
 func ReadConfig() Config {
-	f, err := os.Open("config.yml")
+	f, err := os.Open("./config/config.yml")
 	if err != nil {
 		panic(err)
 	}
@@ -48,13 +43,4 @@ func ReadConfig() Config {
 	}
 
 	return cfg
-}
-
-func main() {
-
-	cfg = ReadConfig()
-
-	fmt.Println(cfg.Client.ServerAddress)
-	fmt.Println(cfg.Topics.Topic)
-
 }
