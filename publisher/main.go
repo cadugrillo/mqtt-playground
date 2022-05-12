@@ -104,7 +104,7 @@ func main() {
 	//tlsconfig := NewTLSConfig()
 
 	opts := MQTT.NewClientOptions()
-	opts.AddBroker("tcp://localhost:1883")
+	opts.AddBroker("tcp://test.mosquitto.org:1883")
 	opts.SetClientID("cg-playground") //.SetTLSConfig(tlsconfig)
 	opts.SetDefaultPublishHandler(f)
 
@@ -118,7 +118,7 @@ func main() {
 
 	i := 0
 	for range time.Tick(time.Duration(1) * time.Second) {
-		if i == 5 {
+		if i == 3 {
 			break
 		}
 		text := fmt.Sprintf("this is msg #%d!", i)
@@ -127,7 +127,8 @@ func main() {
 			panic(err)
 		}
 
-		c.Publish("/cg-playground/sample/3", 0, false, msg)
+		c.Publish("/cg-playground/sample/20", 0, false, msg)
+		fmt.Println(msg)
 		i++
 	}
 

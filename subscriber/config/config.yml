@@ -1,7 +1,7 @@
 #MQTT CLIENT CONFIGURATIONS
 client:
   clientId: "cg_subscriber"
-  serverAddress: "tcp://localhost:1883"
+  serverAddress: "tcp://test.mosquitto.org:1883"
   qos: 1
   connectionTimeout: 1
   writeTimeout: 1
@@ -9,6 +9,7 @@ client:
   pingTimeout: 1
   connectRetry: true
   autoConnect: true
+  orderMaters: false
 
 #LOGS
 #writeTolog - If true then received messages will be written to the console
@@ -23,7 +24,4 @@ topics:
   topic:
     - "/cg-playground/sample/1"
     - "/cg-playground/sample/2"
-    - "/cg-playground/sample/3"
-    - "/cg-playground/sample/4"
-    - "/cg-playground/sample/5"
-    - "/cg-playground/sample/6"
+    - "/cg-playground/#"

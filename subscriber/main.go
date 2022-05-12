@@ -1,22 +1,8 @@
-/*
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * and Eclipse Distribution License v1.0 which accompany this distribution.
- *
- * The Eclipse Public License is available at
- *    https://www.eclipse.org/legal/epl-2.0/
- * and the Eclipse Distribution License is available at
- *   http://www.eclipse.org/org/documents/edl-v10.php.
- * Contributors:
- *    Matt Brittan
- */
-
 package main
 
 // Connect to the broker, subscribe, and write messages received to a file
 
 import (
-	"encoding/json"
 	"fmt"
 	"mqtt-playground/subscriber/config"
 	"os"
@@ -25,18 +11,6 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-)
-
-const (
-	TOPIC         = "/cg-playground/sample"
-	QOS           = 1
-	SERVERADDRESS = "tcp://localhost:1883"
-	CLIENTID      = "cg_subscriber"
-
-	WRITETOLOG  = true  // If true then received messages will be written to the console
-	WRITETODISK = false // If true then received messages will be written to the file below
-
-	OUTPUTFILE = "./binds/receivedMessages.txt"
 )
 
 var (
@@ -51,9 +25,9 @@ type handler struct {
 
 func NewHandler() *handler {
 	var f *os.File
-	if WRITETODISK {
+	if ConfigFile.Logs.WriteToDisk {
 		var err error
-		f, err = os.Create(OUTPUTFILE)
+		f, err = os.Create(ConfigFile.Logs.OutputFile)
 		if err != nil {
 			panic(err)
 		}
@@ -73,26 +47,30 @@ func (o *handler) Close() {
 
 // Message
 type Message struct {
-	Message string
+	Duplicate bool
+	Qos       byte
+	Retained  bool
+	Topic     string
+	MessageID uint16
+	Payload   string
+	Ack       bool
 }
 
 // handle is called when a message is received
 func (o *handler) handle(_ mqtt.Client, msg mqtt.Message) {
-	// We extract the count and write that out first to simplify checking for missing values
-	var m Message
-	if err := json.Unmarshal(msg.Payload(), &m); err != nil {
-		fmt.Printf("Message could not be parsed (%s): %s", msg.Payload(), err)
+
+	recmsg := fmt.Sprintf("Received Message: TOPIC: %s, PAYLOAD: %s ", msg.Topic(), msg.Payload())
+
+	if ConfigFile.Logs.WriteToLog {
+		fmt.Println(recmsg)
 	}
+
 	if o.f != nil {
-		// Write out the number (make it long enough that sorting works) and the payload
-		if _, err := o.f.WriteString(m.Message); err != nil {
+		if _, err := o.f.WriteString(recmsg); err != nil {
 			fmt.Printf("ERROR writing to file: %s", err)
 		}
 	}
 
-	if WRITETOLOG {
-		fmt.Printf("received message: %s\n", msg.Payload())
-	}
 }
 
 func main() {
@@ -111,18 +89,18 @@ func main() {
 
 	// Now we establish the connection to the mqtt broker
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(SERVERADDRESS)
-	opts.SetClientID(CLIENTID)
+	opts.AddBroker(ConfigFile.Client.ServerAddress)
+	opts.SetClientID(ConfigFile.Client.ClientId)
 
-	opts.SetOrderMatters(false)       // Allow out of order messages (use this option unless in order delivery is essential)
-	opts.ConnectTimeout = time.Second // Minimal delays on connect
-	opts.WriteTimeout = time.Second   // Minimal delays on writes
-	opts.KeepAlive = 10               // Keepalive every 10 seconds so we quickly detect network outages
-	opts.PingTimeout = time.Second    // local broker so response should be quick
+	opts.SetOrderMatters(ConfigFile.Client.OrderMaters)                                      // Allow out of order messages (use this option unless in order delivery is essential)
+	opts.ConnectTimeout = (time.Duration(ConfigFile.Client.ConnectionTimeout) * time.Second) // Minimal delays on connect
+	opts.WriteTimeout = (time.Duration(ConfigFile.Client.WriteTimeout) * time.Second)        // Minimal delays on writes
+	opts.KeepAlive = int64(ConfigFile.Client.KeepAlive)                                      // Keepalive every 10 seconds so we quickly detect network outages
+	opts.PingTimeout = (time.Duration(ConfigFile.Client.PingTimeout) * time.Second)          // local broker so response should be quick
 
 	// Automate connection management (will keep trying to connect and will reconnect if network drops)
-	opts.ConnectRetry = true
-	opts.AutoReconnect = true
+	opts.ConnectRetry = ConfigFile.Client.ConnectRetry
+	opts.AutoReconnect = ConfigFile.Client.AutoConnect
 
 	// If using QOS2 and CleanSession = FALSE then it is possible that we will receive messages on topics that we
 	// have not subscribed to here (if they were previously subscribed to they are part of the session and survive
@@ -142,7 +120,7 @@ func main() {
 		// Establish the subscription - doing this here means that it will happen every time a connection is established
 		// (useful if opts.CleanSession is TRUE or the broker does not reliably store session data)
 		for i := 0; i < len(ConfigFile.Topics.Topic); i++ {
-			t := c.Subscribe(ConfigFile.Topics.Topic[i], QOS, h.handle)
+			t := c.Subscribe(ConfigFile.Topics.Topic[i], byte(ConfigFile.Client.Qos), h.handle)
 			id := i
 
 			// the connection handler is called in a goroutine so blocking here would not cause an issue. However as blocking

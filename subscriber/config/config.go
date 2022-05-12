@@ -17,6 +17,7 @@ type Config struct {
 		PingTimeout       int    `yaml:"pingTimeout"`
 		ConnectRetry      bool   `yaml:"connectRetry"`
 		AutoConnect       bool   `yaml:"autoConnect"`
+		OrderMaters       bool   `yaml:"orderMaters"`
 	} `yaml:"client"`
 	Logs struct {
 		WriteToLog  bool   `yaml:"writeToLog"`
