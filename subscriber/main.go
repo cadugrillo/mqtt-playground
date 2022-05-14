@@ -7,6 +7,7 @@ import (
 	"mqtt-playground/subscriber/config"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -14,8 +15,17 @@ import (
 )
 
 var (
+	once       sync.Once
 	ConfigFile config.Config
 )
+
+func init() {
+	once.Do(initialise)
+}
+
+func initialise() {
+
+}
 
 // handler is a simple struct that provides a function to be called when a message is received. The message is parsed
 // and the count followed by the raw message is written to the file (this makes it easier to sort the file)
@@ -76,6 +86,8 @@ func (o *handler) handle(_ mqtt.Client, msg mqtt.Message) {
 func main() {
 
 	ConfigFile = config.ReadConfig()
+
+	//b := mqttbuffer.Newmqttbuffer()
 
 	// Enable logging by uncommenting the below
 	// mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)

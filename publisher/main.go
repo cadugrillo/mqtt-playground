@@ -118,7 +118,7 @@ func main() {
 
 	i := 0
 	for range time.Tick(time.Duration(1) * time.Second) {
-		if i == 3 {
+		if i == 1 {
 			break
 		}
 		text := fmt.Sprintf("this is msg #%d!", i)
@@ -127,7 +127,7 @@ func main() {
 			panic(err)
 		}
 
-		c.Publish("/cg-playground/sample/20", 0, false, msg)
+		c.Publish("/cg-playground/sample/1", 0, false, msg)
 		fmt.Println(msg)
 		i++
 	}
