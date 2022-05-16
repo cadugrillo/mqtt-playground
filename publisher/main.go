@@ -117,8 +117,8 @@ func main() {
 	fmt.Println("Connection is up")
 
 	i := 1
-	for range time.Tick(time.Duration(1) * time.Second) {
-		if i == 51 {
+	for range time.Tick(time.Duration(100) * time.Millisecond) {
+		if i == 11 {
 			break
 		}
 		text := fmt.Sprintf("this is msg #%d!", i)

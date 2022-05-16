@@ -70,20 +70,6 @@ func (o *handler) handle(_ mqtt.Client, msg mqtt.Message) {
 
 	b = b.AddMessage(recmsg)
 
-	//recmsg := fmt.Sprintf("Received Message: TOPIC: %s, PAYLOAD: %s ", msg.Topic(), msg.Payload())
-
-	if ConfigFile.Logs.WriteToLog {
-		if b.NewMessage() {
-			//msg, err := b.ReadMessage(b.GetReadPointer())
-			//if err != nil {
-			//	panic(err.Error())
-			//}
-			fmt.Println(b)
-			b = b.NextMessage()
-			//fmt.Println("Read pointer after adding new msg: ", b.GetReadPointer())
-		}
-
-	}
 	if o.f != nil {
 		if _, err := o.f.WriteString(recmsg.Payload); err != nil {
 			fmt.Printf("ERROR writing to file: %s", err)
@@ -172,6 +158,22 @@ func main() {
 		panic(token.Error())
 	}
 	fmt.Println("Connection is up")
+
+	go func() {
+		for {
+			if ConfigFile.Logs.WriteToLog {
+				if b.NewMessage() {
+					msg, err := b.ReadMessage(b.GetReadPointer())
+					if err != nil {
+						panic(err.Error())
+					}
+					fmt.Println(msg.Payload)
+					b = b.NextMessage()
+				}
+
+			}
+		}
+	}()
 
 	// Messages will be delivered asynchronously so we just need to wait for a signal to shutdown
 	sig := make(chan os.Signal, 1)

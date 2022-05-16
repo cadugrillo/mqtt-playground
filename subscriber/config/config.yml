@@ -1,7 +1,7 @@
 #MQTT CLIENT CONFIGURATIONS
 client:
   clientId: "cg_subscriber"
-  serverAddress: "tcp://test.mosquitto.org:1883"
+  serverAddress: "tcp://localhost:1883"
   qos: 1
   connectionTimeout: 1
   writeTimeout: 1

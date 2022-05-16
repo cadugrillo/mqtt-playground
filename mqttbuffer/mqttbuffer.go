@@ -6,7 +6,7 @@ import (
 )
 
 type Mqttbuffer struct {
-	buffer       [5]Message
+	buffer       [100]Message
 	readPointer  int
 	writePointer int
 }

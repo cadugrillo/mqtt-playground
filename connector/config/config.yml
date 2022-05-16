@@ -1,0 +1,37 @@
+#MQTT CLIENT CONFIGURATIONS
+clientSub:
+  clientId: "cg_subscriber"
+  serverAddress: "tcp://test.mosquitto.org:1883"
+  qos: 1
+  connectionTimeout: 1
+  writeTimeout: 1
+  keepAlive: 10
+  pingTimeout: 1
+  connectRetry: true
+  autoConnect: true
+  orderMaters: false
+
+clientPub:
+  clientId: "cg_publisher"
+  serverAddress: "tcp://localhost:1883"
+  qos: 1
+  connectionTimeout: 1
+  writeTimeout: 1
+  keepAlive: 10
+  pingTimeout: 1
+  connectRetry: true
+  autoConnect: true
+  orderMaters: false  
+
+#LOGS
+logs:
+  subPayload: true
+  debug: true
+  warning: true
+  error: true
+  critical: true
+
+#TOPICS TO SUBSCRIBE TO
+topics:
+  topic:
+    - "/cg-playground/sample/1"
