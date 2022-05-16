@@ -1,11 +1,11 @@
-package mqttbuffer
+package Mqttbuffer
 
 import (
 	"errors"
 	"fmt"
 )
 
-type mqttbuffer struct {
+type Mqttbuffer struct {
 	buffer       [5]Message
 	readPointer  int
 	writePointer int
@@ -22,29 +22,31 @@ type Message struct {
 	Ack       bool
 }
 
-func Newmqttbuffer() mqttbuffer {
-	b := mqttbuffer{}
+func NewMqttbuffer() Mqttbuffer {
+	b := Mqttbuffer{}
 	return b
 }
 
-func (b mqttbuffer) GetReadPointer() int {
+func (b Mqttbuffer) GetReadPointer() int {
 	return b.readPointer
 }
 
-func (b mqttbuffer) GetWritePointer() int {
+func (b Mqttbuffer) GetWritePointer() int {
 	return b.writePointer
 }
 
-func (b mqttbuffer) AddMessage(message Message) mqttbuffer {
-	if b.writePointer == len(b.buffer) {
+func (b Mqttbuffer) AddMessage(message Message) Mqttbuffer {
+	if b.writePointer == len(b.buffer)-1 {
+		b.buffer[b.writePointer] = message
 		b.writePointer = 0
+		return b
 	}
 	b.buffer[b.writePointer] = message
 	b.writePointer++
 	return b
 }
 
-func (b mqttbuffer) ReadMessage(index int) (Message, error) {
+func (b Mqttbuffer) ReadMessage(index int) (Message, error) {
 	if index < len(b.buffer) {
 		return b.buffer[index], nil
 	}
@@ -52,11 +54,12 @@ func (b mqttbuffer) ReadMessage(index int) (Message, error) {
 	return msg, errors.New(fmt.Sprintf("Index %d greater then buffer size [%d]", index, len(b.buffer)))
 }
 
-func (b mqttbuffer) NextMessage() mqttbuffer {
-	if b.readPointer == len(b.buffer) {
+func (b Mqttbuffer) NextMessage() Mqttbuffer {
+	if b.readPointer == len(b.buffer)-1 {
 		b.readPointer = 0
+		return b
 	}
-	if b.readPointer < b.writePointer {
+	if b.readPointer != b.writePointer {
 		b.readPointer++
 		return b
 	}
@@ -64,6 +67,6 @@ func (b mqttbuffer) NextMessage() mqttbuffer {
 	return b
 }
 
-func (b mqttbuffer) NewMessage() bool {
+func (b Mqttbuffer) NewMessage() bool {
 	return b.writePointer != b.readPointer
 }

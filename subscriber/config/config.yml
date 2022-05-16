@@ -23,5 +23,3 @@ logs:
 topics:
   topic:
     - "/cg-playground/sample/1"
-    - "/cg-playground/sample/2"
-    - "/cg-playground/#"

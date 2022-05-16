@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	Mqttbuffer "mqtt-playground/mqttbuffer"
 	"mqtt-playground/subscriber/config"
 	"os"
 	"os/signal"
@@ -17,6 +18,7 @@ import (
 var (
 	once       sync.Once
 	ConfigFile config.Config
+	b          Mqttbuffer.Mqttbuffer
 )
 
 func init() {
@@ -24,7 +26,7 @@ func init() {
 }
 
 func initialise() {
-
+	b = Mqttbuffer.NewMqttbuffer()
 }
 
 // handler is a simple struct that provides a function to be called when a message is received. The message is parsed
@@ -55,39 +57,43 @@ func (o *handler) Close() {
 	}
 }
 
-// Message
-type Message struct {
-	Duplicate bool
-	Qos       byte
-	Retained  bool
-	Topic     string
-	MessageID uint16
-	Payload   string
-	Ack       bool
-}
-
 // handle is called when a message is received
 func (o *handler) handle(_ mqtt.Client, msg mqtt.Message) {
 
-	recmsg := fmt.Sprintf("Received Message: TOPIC: %s, PAYLOAD: %s ", msg.Topic(), msg.Payload())
+	var recmsg Mqttbuffer.Message
+	recmsg.Duplicate = msg.Duplicate()
+	recmsg.Qos = msg.Qos()
+	recmsg.Retained = msg.Retained()
+	recmsg.Topic = msg.Topic()
+	recmsg.MessageID = msg.MessageID()
+	recmsg.Payload = string(msg.Payload())
+
+	b = b.AddMessage(recmsg)
+
+	//recmsg := fmt.Sprintf("Received Message: TOPIC: %s, PAYLOAD: %s ", msg.Topic(), msg.Payload())
 
 	if ConfigFile.Logs.WriteToLog {
-		fmt.Println(recmsg)
-	}
+		if b.NewMessage() {
+			//msg, err := b.ReadMessage(b.GetReadPointer())
+			//if err != nil {
+			//	panic(err.Error())
+			//}
+			fmt.Println(b)
+			b = b.NextMessage()
+			//fmt.Println("Read pointer after adding new msg: ", b.GetReadPointer())
+		}
 
+	}
 	if o.f != nil {
-		if _, err := o.f.WriteString(recmsg); err != nil {
+		if _, err := o.f.WriteString(recmsg.Payload); err != nil {
 			fmt.Printf("ERROR writing to file: %s", err)
 		}
 	}
-
 }
 
 func main() {
 
 	ConfigFile = config.ReadConfig()
-
-	//b := mqttbuffer.Newmqttbuffer()
 
 	// Enable logging by uncommenting the below
 	// mqtt.ERROR = log.New(os.Stdout, "[ERROR] ", 0)
