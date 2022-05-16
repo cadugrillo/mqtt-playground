@@ -40,7 +40,7 @@ func (b mqttbuffer) ReadMessage(index int) string {
 	return ""
 }
 
-func (b mqttbuffer) ReadNextMessage() mqttbuffer {
+func (b mqttbuffer) NextMessage() mqttbuffer {
 	if b.readPointer == len(b.buffer) {
 		b.readPointer = 0
 	}
@@ -50,4 +50,8 @@ func (b mqttbuffer) ReadNextMessage() mqttbuffer {
 	}
 	fmt.Println("No new messages on the buffer")
 	return b
+}
+
+func (b mqttbuffer) NewMessage() bool {
+	return b.writePointer != b.readPointer
 }
