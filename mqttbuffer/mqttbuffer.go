@@ -52,7 +52,7 @@ func (b mqttbuffer) ReadMessage(index int) (Message, error) {
 	return msg, errors.New(fmt.Sprintf("Index %d greater then buffer size [%d]", index, len(b.buffer)))
 }
 
-func (b mqttbuffer) ReadNextMessage() mqttbuffer {
+func (b mqttbuffer) NextMessage() mqttbuffer {
 	if b.readPointer == len(b.buffer) {
 		b.readPointer = 0
 	}
@@ -62,4 +62,8 @@ func (b mqttbuffer) ReadNextMessage() mqttbuffer {
 	}
 	fmt.Println("No new messages on the buffer")
 	return b
+}
+
+func (b mqttbuffer) NewMessage() bool {
+	return b.writePointer != b.readPointer
 }
