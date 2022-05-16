@@ -1,13 +1,25 @@
 package mqttbuffer
 
 import (
+	"errors"
 	"fmt"
 )
 
 type mqttbuffer struct {
-	buffer       [5]string
+	buffer       [5]Message
 	readPointer  int
 	writePointer int
+}
+
+// Message
+type Message struct {
+	Duplicate bool
+	Qos       byte
+	Retained  bool
+	Topic     string
+	MessageID uint16
+	Payload   string
+	Ack       bool
 }
 
 func Newmqttbuffer() mqttbuffer {
@@ -23,7 +35,7 @@ func (b mqttbuffer) GetWritePointer() int {
 	return b.writePointer
 }
 
-func (b mqttbuffer) AddMessage(message string) mqttbuffer {
+func (b mqttbuffer) AddMessage(message Message) mqttbuffer {
 	if b.writePointer == len(b.buffer) {
 		b.writePointer = 0
 	}
@@ -32,12 +44,12 @@ func (b mqttbuffer) AddMessage(message string) mqttbuffer {
 	return b
 }
 
-func (b mqttbuffer) ReadMessage(index int) string {
+func (b mqttbuffer) ReadMessage(index int) (Message, error) {
 	if index < len(b.buffer) {
-		return b.buffer[index]
+		return b.buffer[index], nil
 	}
-	fmt.Printf("Index %d greater then buffer size [%d]", index, len(b.buffer))
-	return ""
+	msg := Message{}
+	return msg, errors.New(fmt.Sprintf("Index %d greater then buffer size [%d]", index, len(b.buffer)))
 }
 
 func (b mqttbuffer) ReadNextMessage() mqttbuffer {
