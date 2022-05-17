@@ -26,12 +26,22 @@ clientPub:
 #LOGS
 logs:
   subPayload: true
-  debug: true
-  warning: true
-  error: true
-  critical: true
+  debug: false
+  warning: false
+  error: false
+  critical: false
 
 #TOPICS TO SUBSCRIBE TO
-topics:
+topicsSub:
   topic:
     - "/cg-playground/sample/1"
+    - "/cg-playground/sample/2"
+    - "/cg-playground/sample/3"
+
+
+#TOPICS TO PUBLISH TO
+topicsPub:
+  topic:
+    - "/cg-playground/sample/11"
+    - "/cg-playground/sample/12"
+    - "/cg-playground/sample/13"

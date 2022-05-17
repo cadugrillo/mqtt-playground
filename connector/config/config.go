@@ -38,9 +38,12 @@ type Config struct {
 		Error      bool `yaml:"error"`
 		Critical   bool `yaml:"critical"`
 	} `yaml:"logs"`
-	Topics struct {
+	TopicsSub struct {
 		Topic []string
-	} `yaml:"topics"`
+	} `yaml:"topicsSub"`
+	TopicsPub struct {
+		Topic []string
+	} `yaml:"topicsPub"`
 }
 
 func ReadConfig() Config {

@@ -167,7 +167,7 @@ func main() {
 					if err != nil {
 						panic(err.Error())
 					}
-					fmt.Println(msg.Payload)
+					fmt.Println("TOPIC: ", msg.Topic, " PAYLOAD: ", msg.Payload)
 					b = b.NextMessage()
 				}
 

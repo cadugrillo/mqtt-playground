@@ -22,4 +22,4 @@ logs:
 #TOPICS TO SUBSCRIBE TO
 topics:
   topic:
-    - "/cg-playground/sample/1"
+    - "/cg-playground/#"

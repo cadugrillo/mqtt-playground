@@ -43,9 +43,15 @@ func (o *handler) handle(_ mqtt.Client, msg mqtt.Message) {
 	recmsg.Duplicate = msg.Duplicate()
 	recmsg.Qos = msg.Qos()
 	recmsg.Retained = msg.Retained()
-	recmsg.Topic = msg.Topic()
 	recmsg.MessageID = msg.MessageID()
 	recmsg.Payload = string(msg.Payload())
+
+	for i := 0; i < len(ConfigFile.TopicsSub.Topic); i++ {
+		if ConfigFile.TopicsSub.Topic[i] == msg.Topic() {
+			recmsg.Topic = ConfigFile.TopicsPub.Topic[i]
+			break
+		}
+	}
 
 	b = b.AddMessage(recmsg)
 }
@@ -88,8 +94,8 @@ func main() {
 
 		// Establish the subscription - doing this here means that it will happen every time a connection is established
 		// (useful if opts.CleanSession is TRUE or the broker does not reliably store session data)
-		for i := 0; i < len(ConfigFile.Topics.Topic); i++ {
-			t := c.Subscribe(ConfigFile.Topics.Topic[i], byte(ConfigFile.ClientSub.Qos), h.handle)
+		for i := 0; i < len(ConfigFile.TopicsSub.Topic); i++ {
+			t := c.Subscribe(ConfigFile.TopicsSub.Topic[i], byte(ConfigFile.ClientSub.Qos), h.handle)
 			id := i
 
 			// the connection handler is called in a goroutine so blocking here would not cause an issue. However as blocking
@@ -99,7 +105,7 @@ func main() {
 				if t.Error() != nil {
 					fmt.Printf("SUB BROKER - ERROR SUBSCRIBING TO : %s\n", t.Error())
 				} else {
-					fmt.Println("SUB BROKER - SUBSCRIBED TO : ", ConfigFile.Topics.Topic[id])
+					fmt.Println("SUB BROKER - SUBSCRIBED TO : ", ConfigFile.TopicsSub.Topic[id])
 				}
 			}()
 		}
@@ -130,8 +136,8 @@ func main() {
 
 	// If using QOS2 and CleanSession = FALSE then messages may be transmitted to us before the subscribe completes.
 	// Adding routes prior to connecting is a way of ensuring that these messages are processed
-	for i := 0; i < len(ConfigFile.Topics.Topic); i++ {
-		clientSub.AddRoute(ConfigFile.Topics.Topic[i], h.handle)
+	for i := 0; i < len(ConfigFile.TopicsSub.Topic); i++ {
+		clientSub.AddRoute(ConfigFile.TopicsSub.Topic[i], h.handle)
 	}
 
 	if tokenSub := clientSub.Connect(); tokenSub.Wait() && tokenSub.Error() != nil {

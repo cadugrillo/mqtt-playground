@@ -118,7 +118,7 @@ func main() {
 
 	i := 1
 	for range time.Tick(time.Duration(100) * time.Millisecond) {
-		if i == 11 {
+		if i == 25001 {
 			break
 		}
 		text := fmt.Sprintf("this is msg #%d!", i)
