@@ -117,8 +117,13 @@ func main() {
 	fmt.Println("Connection is up")
 
 	i := 1
+<<<<<<< HEAD:publishers/pub1/main.go
 	for range time.Tick(time.Duration(500) * time.Millisecond) {
 		if i == 1001 {
+=======
+	for range time.Tick(time.Duration(100) * time.Millisecond) {
+		if i == 5001 {
+>>>>>>> db369cd50a38d3b8838f3cafabeac7c15910afb3:publisher/main.go
 			break
 		}
 		text := fmt.Sprintf("this is msg #%d!", i)
@@ -127,7 +132,11 @@ func main() {
 			panic(err)
 		}
 
+<<<<<<< HEAD:publishers/pub1/main.go
 		c.Publish("cg-connector/sample/1", 0, false, msg)
+=======
+		c.Publish("/cg-connector/sample/1", 0, false, msg)
+>>>>>>> db369cd50a38d3b8838f3cafabeac7c15910afb3:publisher/main.go
 		fmt.Println(msg)
 		i++
 	}
