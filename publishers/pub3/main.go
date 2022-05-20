@@ -117,8 +117,8 @@ func main() {
 	fmt.Println("Connection is up")
 
 	i := 1
-	for range time.Tick(time.Duration(100) * time.Millisecond) {
-		if i == 25001 {
+	for range time.Tick(time.Duration(500) * time.Millisecond) {
+		if i == 1001 {
 			break
 		}
 		text := fmt.Sprintf("this is msg #%d!", i)
@@ -127,7 +127,7 @@ func main() {
 			panic(err)
 		}
 
-		c.Publish("/cg-playground/sample/1", 0, false, msg)
+		c.Publish("cg-connector/sample/3", 0, false, msg)
 		fmt.Println(msg)
 		i++
 	}
