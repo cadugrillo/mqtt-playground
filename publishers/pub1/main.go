@@ -105,7 +105,7 @@ func main() {
 
 	opts := MQTT.NewClientOptions()
 	opts.AddBroker("tcp://test.mosquitto.org:1883")
-	opts.SetClientID("cg-playground") //.SetTLSConfig(tlsconfig)
+	opts.SetClientID("cg-publisher1") //.SetTLSConfig(tlsconfig)
 	opts.SetDefaultPublishHandler(f)
 
 	// Start the connection
